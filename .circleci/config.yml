@@ -1,0 +1,41 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:11-jdk
+
+    working_directory: ~/selenium-project
+
+    steps:
+      - checkout
+
+      # Install Chrome and ChromeDriver
+      - run:
+          name: Install Chrome and ChromeDriver
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y unzip
+            wget -N https://chromedriver.storage.googleapis.com/97.0.4692.71/chromedriver_linux64.zip
+            unzip chromedriver_linux64.zip
+            sudo mv chromedriver /usr/local/bin/
+            sudo apt-get install -y google-chrome-stable
+
+      # Set up the project dependencies
+      - run:
+          name: Set up project dependencies
+          command: |
+            sudo apt-get install -y maven
+            mvn clean install
+
+      # Run the Selenium script
+      - run:
+          name: Run Selenium script
+          command: |
+            mvn test
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
